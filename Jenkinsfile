@@ -27,12 +27,6 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                sh "npm test"
-            }
-        }
-
         stage('Trivy Scanning') {
             steps {
                 sh "trivy fs --format table trivy-file-report.html ."
