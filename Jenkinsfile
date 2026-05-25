@@ -11,7 +11,7 @@ pipeline {
         string(name: 'AWS_ACCOUNT_ID', defaultValue: '', description: 'Enter AWS Account ID')
     }
     environment{
-        SONAR_HOME = tool "sonar-scanner"
+        SCANNER_HOME = tool "sonar-scanner"
     }
 
     stages {
