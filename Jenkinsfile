@@ -17,7 +17,7 @@ pipeline {
     stages {
         stage('Git Checkout') {
             steps {
-                git branch: 'main', credentialsId: 'github-cred', url: 'https://github.com/pranav0015/Prime-Video-Clone.git'
+                git branch: 'main', credentialsId: 'github-cred', url: 'https://github.com/pranav0015/amazon-prime-complete-CICD.git'
             }
         }
     
