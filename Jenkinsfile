@@ -58,7 +58,7 @@ pipeline {
 
         stage('Docker Image Scan') {
             steps {
-               sh "trivy image --format table trivy-docker-image-scan-report.html ${params.ECR_REPO_NAME}"
+               sh "trivy image --format table -o trivy-docker-image-scan-report.html ${params.ECR_REPO_NAME}"
             }
         }
 
