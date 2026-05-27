@@ -30,7 +30,7 @@ pipeline{
                     helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
 
                     // check if "prometheus" namespace exists
-                    if kubectl get namespace prometheus > /dev/null 2&1; then
+                    if kubectl get namespace prometheus > /dev/null 2>&1; then
                         // if exists, upgrade the HELM relase
                         helm repo upgrade stable prometheus-community/kube-prometheus-stack -n prometheus
                     else
