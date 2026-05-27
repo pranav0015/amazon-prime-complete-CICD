@@ -1,4 +1,4 @@
-# Below is the single stage docker file which as size 218 MB
+# Below is the single stage docker file which as size 218 MB -> 1min 50 sec time Jenkins was takign to build this large size dockerfile
 
 # Use Node.js Alpine base image
 #FROM node:alpine
@@ -24,6 +24,7 @@
 
 
 # In order to reduce the docker image size, need to implement multi stage dockerfile. Below is the implementation.
+# Using Multistage docker image size becomes 26.4 MB from 218 MB
 
 # BUILD STAGE
 # Use Node.js Alpine base image
