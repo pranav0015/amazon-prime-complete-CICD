@@ -1,6 +1,6 @@
 // This is the deployment Pipeline (CD) using ArgoCD.
 
-Pipeline{
+pipeline{
     agent any
 
     environment{
@@ -8,7 +8,7 @@ Pipeline{
     }
 
     parameters{
-        string(name: 'EKS_Cluster_Name', defaultValue: 'amazon-prime-eks-cluster', description: 'Enter EKS Cluster Name')
+        string(name: 'EKS_Cluster_Name', defaultValue: 'amazon-prime-cluster', description: 'Enter the EKS Cluster Name')
     }
 
     stages{
@@ -48,7 +48,6 @@ Pipeline{
         }
 
         stage("Configure ArgoCD"){
-            stage{
                 steps{
                     script{
                         sh """
@@ -59,7 +58,6 @@ Pipeline{
                         """
                     }
                 }
-            }
         }
     }
 }
