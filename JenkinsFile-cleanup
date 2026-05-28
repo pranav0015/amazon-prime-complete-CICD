@@ -51,7 +51,7 @@ pipeline {
                 script {
                     // Step 1: Delete ECR Repository
                     sh '''
-                    aws ecr delete-repository --repository-name amazon-prime --region ap-south-1 --force
+                    aws ecr delete-repository --repository-name amazon-prime --region ap-south-1 --force || true
                     '''
                 }
             }
