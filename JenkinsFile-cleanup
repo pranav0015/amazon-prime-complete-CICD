@@ -53,14 +53,6 @@ pipeline {
                     sh '''
                     aws ecr delete-repository --repository-name amazon-prime --region ap-south-1 --force
                     '''
-
-                    // Step 2: Delete KMS Keys
-                    sh '''
-                    for key in $(aws kms list-keys --region ap-south-1 --query "Keys[*].KeyId" --output text); do
-                        aws kms disable-key --key-id $key --region ap-south-1
-                        aws kms schedule-key-deletion --key-id $key --pending-window-in-days 7 --region ap-south-1
-                    done
-                    '''
                 }
             }
         }		
