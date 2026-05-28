@@ -51,4 +51,5 @@ COPY --from=builder /app/build /usr/share/nginx/html
 
 EXPOSE 80
 
-CMD [ "nginx", "-g", "daemon off;" ] # daemon off = run nginx in foreground mode
+# daemon off = run nginx in foreground mode
+CMD [ "nginx", "-g", "daemon off;" ] 
