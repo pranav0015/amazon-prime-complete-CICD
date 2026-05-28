@@ -47,7 +47,7 @@ pipeline {
 
         stage('SonarQube Quality Gate') {
             steps {
-                waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'  // abortPipeline: false means if code is coverage is not passing 85%(whatever we set), pipeline will not execute further, it will stop.
+                waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'  // abortPipeline: false means if code is coverage is not passing 85%(whatever we set), pipeline will still run.
             }
         }
 
@@ -113,6 +113,16 @@ pipeline {
             }
         }
 
+        stage('Trigger CD Pipeline'){
+            steps{
+                build job: 'deploy-pipeline',
+                wait: false,
+                parameters:[
+                    string(name: 'Image_Tag', value: "${BUILD_NUMBER}")
+                ]
+
+            }
+        }
     }   
 
      post {
