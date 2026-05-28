@@ -73,11 +73,11 @@ pipeline {
         }
 
         stage('Docker Image Scan') {
-            stps {
+            steps {
                 script{
                     env.FAILED_STAGE = "Docker Image Scan"
                 }
-               sh "trivy image --format table -o trivy-docker-image-scan-report.html ${params.ECR_REPO_NAME}"
+               sh "ivy image --format table -o trivy-docker-image-scan-report.html ${params.ECR_REPO_NAME}"
             }
         }
 
