@@ -5,6 +5,7 @@ pipeline{
 
     parameters{
         string(name: 'Image_Tag', defaultValue: 'latest', description: 'Docker Image Tag')
+        string(name: 'EKS_Cluster_Name', defaultValue: 'amazon-prime-cluster', description: 'Enter the EKS Cluster Name')
     }
 
 
@@ -89,7 +90,7 @@ pipeline{
                 <tr>
                     <th align="left">Build URL</th>
                     <td>
-                        <a href="${BUILD_URL}">
+                        <a href="${env.BUILD_URL}">
                             Open Jenkins Build
                         </a>
                     </td>
@@ -167,7 +168,7 @@ pipeline{
                 <tr>
                     <th align="left">Build URL</th>
                     <td>
-                        <a href="${BUILD_URL}">
+                        <a href="${env.BUILD_URL}">
                             Open Jenkins Console Logs
                         </a>
                     </td>

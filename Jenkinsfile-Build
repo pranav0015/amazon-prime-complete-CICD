@@ -25,18 +25,27 @@ pipeline {
     
         stage('NPM Install') {
             steps {
+                script{
+                    env.FAILED_STAGE = "NPM Install"
+                }
                 sh "npm install"
             }
         }
 
         stage('Trivy Scanning') {
             steps {
+                script{
+                    env.FAILED_STAGE = "Trivy Scanning"
+                }
                 sh "trivy fs --format table -o trivy-file-report.html ."
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
+                script{
+                    env.FAILED_STAGE = "SonarQube Analysis"
+                }
                 withSonarQubeEnv('sonar-server') {
                     sh ''' $SCANNER_HOME/bin/sonar-scanner \
                     -Dsonar.projectName=amazonPrime \
@@ -47,24 +56,36 @@ pipeline {
 
         stage('SonarQube Quality Gate') {
             steps {
+                script{
+                    env.FAILED_STAGE = "SonarQube Quality Gate"
+                }
                 waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'  // abortPipeline: false means if code is coverage is not passing 85%(whatever we set), pipeline will still run.
             }
         }
 
         stage('Build Docker Image') {
             steps {
+                script{
+                    env.FAILED_STAGE = "Build Docker Image"
+                }
                 sh "docker build -t ${params.ECR_REPO_NAME} ."
             }
         }
 
         stage('Docker Image Scan') {
             steps {
+                script{
+                    env.FAILED_STAGE = "Docker Image Scan"
+                }
                sh "trivy image --format table -o trivy-docker-image-scan-report.html ${params.ECR_REPO_NAME}"
             }
         }
 
         stage('Create ECR Repo') {
             steps {
+                script{
+                    env.FAILED_STAGE = "Create ECR Repo"
+                }
                withCredentials([string(credentialsId: 'iam-user-access-key', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'iam-user-secret-key', variable: 'AWS_SECRET_KEY')]) {
                     // aws ecr describe repositories command will check if repo already existed. If existed it will not create, if not it will create ECR repo.
 
@@ -81,6 +102,9 @@ pipeline {
 
         stage('Login to ECR and Tagging the Image') {
             steps {
+                script{
+                    env.FAILED_STAGE = "Login to ECR and Tagging the Image"
+                }
                withCredentials([string(credentialsId: 'iam-user-access-key', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'iam-user-secret-key', variable: 'AWS_SECRET_KEY')]) {
                     // for below command, create a test ECR repo and modify the commands as per our configuration and need.
                     sh """
@@ -92,8 +116,11 @@ pipeline {
             }
         }
             
-        stage('Push Images ECR') {
+        stage('Push Image to ECR') {
             steps {
+                script{
+                    env.FAILED_STAGE = "Push Image to ECR"
+                }
                withCredentials([string(credentialsId: 'iam-user-access-key', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'iam-user-secret-key', variable: 'AWS_SECRET_KEY')]) {
                     sh """
                     docker push ${params.AWS_ACCOUNT_ID}.dkr.ecr.ap-south-1.amazonaws.com/${params.ECR_REPO_NAME}:$BUILD_NUMBER
@@ -115,6 +142,9 @@ pipeline {
 
         stage('Trigger CD Pipeline'){
             steps{
+                script{
+                    env.FAILED_STAGE = "Trigger CD Pipeline"
+                }
                 build job: 'deploy-pipeline',
                 wait: false,
                 parameters:[
@@ -126,35 +156,157 @@ pipeline {
     }   
 
      post {
-    always {
+
+    success {
         script {
-            def jobName = env.JOB_NAME
-            def buildNumber = env.BUILD_NUMBER
-            def pipelineStatus = currentBuild.result ?: 'UNKNOWN'
-            def bannerColor = pipelineStatus.toUpperCase() == 'SUCCESS' ? 'green' : 'red'
 
             def body = """
-                <html>
-                <body>
-                <div style="border: 4px solid ${bannerColor}; padding: 10px;">
-                <h2>${jobName} - Build ${buildNumber}</h2>
-                <div style="background-color: ${bannerColor}; padding: 10px;">
-                <h3 style="color: white;">Pipeline Status: ${pipelineStatus.toUpperCase()}</h3>
-                </div>
-                <p>Check the <a href="${BUILD_URL}">console output</a>.</p>
-                </div>
-                </body>
-                </html>
+            <html>
+            <body>
+
+            <div style="border: 4px solid green; padding: 15px; border-radius: 10px;">
+
+            <h2>CI Pipeline Success - Build #${BUILD_NUMBER}</h2>
+
+            <div style="background-color: green; padding: 10px; border-radius: 5px;">
+                <h3 style="color: white;">
+                    Build Status: SUCCESS
+                </h3>
+            </div>
+
+            <br>
+
+            <table border="1" cellpadding="8" cellspacing="0" width="100%">
+
+                <tr>
+                    <th align="left">Pipeline Name</th>
+                    <td>${JOB_NAME}</td>
+                </tr>
+
+                <tr>
+                    <th align="left">Build Number</th>
+                    <td>${BUILD_NUMBER}</td>
+                </tr>
+
+                <tr>
+                    <th align="left">Docker Repository</th>
+                    <td>${params.ECR_REPO_NAME}</td>
+                </tr>
+
+                <tr>
+                    <th align="left">Build URL</th>
+                    <td>
+                        <a href="${env.BUILD_URL}">
+                            Open Jenkins Build
+                        </a>
+                    </td>
+                </tr>
+
+            </table>
+
+            <br>
+
+            <h3>CI Pipeline Summary</h3>
+
+            <ul>
+                <li>Git checkout completed</li>
+                <li>NPM install completed</li>
+                <li>Trivy filesystem scan completed</li>
+                <li>SonarQube analysis passed</li>
+                <li>Docker image built successfully</li>
+                <li>Docker image pushed to AWS ECR</li>
+            </ul>
+
+            </div>
+
+            </body>
+            </html>
             """
 
-            emailext (
-                subject: "${jobName} - Build ${buildNumber} - ${pipelineStatus.toUpperCase()}",
-                body: "Build Pipeline executed successfully.",
+            emailext(
+                subject: "SUCCESS: CI Pipeline - Build #${BUILD_NUMBER}",
+                body: body,
                 to: 'waktepranav00@gmail.com',
                 from: 'jenkins@example.com',
                 replyTo: 'jenkins@example.com',
                 mimeType: 'text/html',
                 attachmentsPattern: 'trivy-file-report.html'
+            )
+        }
+    }
+
+    failure {
+        script {
+
+            def body = """
+            <html>
+            <body>
+
+            <div style="border: 4px solid red; padding: 15px; border-radius: 10px;">
+
+            <h2>CI Pipeline Failed - Build #${BUILD_NUMBER}</h2>
+
+            <div style="background-color: red; padding: 10px; border-radius: 5px;">
+                <h3 style="color: white;">
+                    Build Status: FAILED
+                </h3>
+            </div>
+
+            <br>
+
+            <table border="1" cellpadding="8" cellspacing="0" width="100%">
+
+                <tr>
+                    <th align="left">Pipeline Name</th>
+                    <td>${JOB_NAME}</td>
+                </tr>
+
+                <tr>
+                    <th align="left">Build Number</th>
+                    <td>${BUILD_NUMBER}</td>
+                </tr>
+
+                <tr>
+                    <th align="left">Docker Repository</th>
+                    <td>${params.ECR_REPO_NAME}</td>
+                </tr>
+
+                <tr>
+                    <th align="left">Build URL</th>
+                    <td>
+                        <a href="${env.BUILD_URL}">
+                            Open Jenkins Console Logs
+                        </a>
+                    </td>
+                </tr>
+
+            </table>
+
+            <br>
+
+            <tr>
+                <th align="left">Failed Stage</th>
+                <td>${env.FAILED_STAGE}</td>
+            </tr>
+
+            <br>
+
+            <p>
+                Please review Jenkins console logs for detailed troubleshooting.
+            </p>
+
+            </div>
+
+            </body>
+            </html>
+            """
+
+            emailext(
+                subject: "FAILED: CI Pipeline - Build #${BUILD_NUMBER}",
+                body: body,
+                to: 'waktepranav00@gmail.com',
+                mimeType: 'text/html',
+                attachmentsPattern: env.FAILED_STAGE == 'Trivy Scanning' ? 'trivy-file-report.html' : ''
             )
         }
     }
