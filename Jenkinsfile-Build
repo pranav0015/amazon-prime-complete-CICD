@@ -82,7 +82,7 @@ pipeline {
         }
 
         stage('Create ECR Repo') {
-            steps {
+            teps {
                 script{
                     env.FAILED_STAGE = "Create ECR Repo"
                 }
