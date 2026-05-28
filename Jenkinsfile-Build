@@ -100,11 +100,8 @@ pipeline {
         }
 
 
-        stage('Login to ECR and Tagging the Image') {
+      stage('Login to ECR and Tagging the Image') {
             steps {
-                script{
-                    env.FAILED_STAGE = "Login to ECR and Tagging the Image"
-                }
                withCredentials([string(credentialsId: 'iam-user-access-key', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'iam-user-secret-key', variable: 'AWS_SECRET_KEY')]) {
                     // for below command, create a test ECR repo and modify the commands as per our configuration and need.
                     sh """
