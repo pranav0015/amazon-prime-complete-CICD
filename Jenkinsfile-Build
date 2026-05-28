@@ -73,7 +73,7 @@ pipeline {
         }
 
         stage('Docker Image Scan') {
-            steps {
+            stps {
                 script{
                     env.FAILED_STAGE = "Docker Image Scan"
                 }
