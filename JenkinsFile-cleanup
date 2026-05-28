@@ -10,17 +10,15 @@ pipeline {
     }
 
     stages {
-
-        stage("Login to EKS") {
-            steps {
-                script {
-                    withCredentials([string(credentialsId: 'access-key', variable: 'AWS_ACCESS_KEY'),
-                                     string(credentialsId: 'secret-key', variable: 'AWS_SECRET_KEY')]) {
-                        sh "aws eks --region ap-south-1 update-kubeconfig --name ${params.CLUSTER_NAME}"
+        stage("Login to EKS"){
+                steps{
+                    script{
+                        withCredentials([string(credentialsId: 'iam-user-access-key', variable: 'AWS_ACCESS_KEY'), string(credentialsId: 'iam-user-secret-key', variable: 'AWS_SECRET_KEY')]) {
+                            sh "aws eks update-kubeconfig --region ap-south-1 --name ${params.EKS_Cluster_Name}"
+                        }
                     }
                 }
             }
-        }
         
         stage('Cleanup K8s Resources') {
             steps {
