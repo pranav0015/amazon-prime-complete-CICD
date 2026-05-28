@@ -115,7 +115,7 @@ pipeline{
 
             emailext(
                 subject: "SUCCESS: CD Pipeline - Build #${BUILD_NUMBER}",
-                body: "CD Pipeline executed successfully.",
+                body: body,
                 to: 'waktepranav00@gmail.com',
                 from: 'jenkins@example.com',
                 replyTo: 'jenkins@example.com',
