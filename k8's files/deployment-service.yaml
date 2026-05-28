@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: amazon-prime-container
-        image: 752948842505.dkr.ecr.ap-south-1.amazonaws.com/amazon-prime:40
+        image: 752948842505.dkr.ecr.ap-south-1.amazonaws.com/amazon-prime:47
         imagePullPolicy: Always
         ports:
         - containerPort: 80
