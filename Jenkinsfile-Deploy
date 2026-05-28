@@ -22,12 +22,12 @@ pipeline{
                     sh """
                     # replace the docker image tag with the latest build number and updated the deployment file
 
-                    sed -i "s|amazon-prime:.*|amazon-prime:${params.Image_Tag}|g" "./k8's files/deployment.yaml"
-                    cat "./k8's files/deployment.yaml"
+                    sed -i "s|amazon-prime:.*|amazon-prime:${params.Image_Tag}|g" "./k8's files/deployment-service.yaml"
+                    cat "./k8's files/deployment-service.yaml"
 
                     # Once deployment files updated, push the changes to Github, so that ArgoCD can detect the change automatically & can syncs automatically. 
 
-                    git add "./k8's files/deployment.yaml"
+                    git add "./k8's files/deployment-service.yaml"
 
                     git commit -m "Updated image tag to ${params.Image_Tag}" || echo "nothing to commit"
 
